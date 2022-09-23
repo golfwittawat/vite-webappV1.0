@@ -17,26 +17,26 @@
 
               <h1 class="mb-4 text-xl font-semibold dark:text-gray-200">สมัครสมาชิกใหม่</h1>
 
-              <form>
+              <form @submit.prevent="onSubmit">
 
                 <label class="block mb-2 text-sm" for="fullname">ชื่อ-สกุล</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="fullname" name="fullname" type="text">
+                <input v-model="fullname" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="fullname" name="fullname" type="text">
                 
                 <label class="block mt-3 mb-2 text-sm" for="username">ชื่อผู้ใช้</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="username" name="username" type="text">
+                <input v-model="username" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="username" name="username" type="text">
                   
 
                 <label class="block mt-3 mb-2 text-sm" for="mobile">เบอร์โทรศัพท์</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="mobile" name="mobile" type="text">
+                <input v-model="mobile" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="mobile" name="mobile" type="text">
 
                 <label class="block mt-3 mb-2 text-sm" for="email">อีเมล์</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="email" name="email" type="text">
+                <input v-model="email" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="email" name="email" type="text">
 
                 <label class="block mt-3 mb-2 text-sm" for="password">รหัสผ่าน</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="password" name="password" type="password">
+                <input v-model="password" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="password" name="password" type="password">
     
                 <label class="block mt-3 mb-2 text-sm" for="confirm_password">ยืนยันรหัสผ่าน</label>
-                <input class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="confirm_password" name="confirm_password" type="password">
+                <input v-model="confirm_password" class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="confirm_password" name="confirm_password" type="password">
 
                 <p class="my-4"></p>
 
@@ -46,7 +46,7 @@
                   </span>
                 </label>
                 
-                <input type="submit" class="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg cursor-pointer active:bg-purple-600 hover:bg-purple-700" value="สมัครสมาชิก">
+                <input @click="submitForm" type="submit" class="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg cursor-pointer active:bg-purple-600 hover:bg-purple-700" value="สมัครสมาชิก">
               </form>
 
               <p class="my-8"></p>
@@ -88,5 +88,73 @@
 </template>
 
 <script>
+//import Vuelidate
+  import useVuelidate from '@vuelidate/core'
+  import {required, email, minLength, sameAs, helpers} from '@vuelidate/validators'
 
+  export function validUsername(user) {
+    let validUserPattern = new RegExp("^[a-zA-Z]*$");
+    if (validUserPattern.test(user)){
+      return true;
+    }
+    return false;
+  }
+  export default{
+    data(){
+      return{
+        //กำหนดตัวแปรสำหรับเป็น object ในการ validate
+        v$:useVuelidate(),
+
+        fullname: '',
+        username: '',
+        mobile: '',
+        email: '',
+        password:{
+          password: '',
+          confirm_password: '',
+        }
+      }
+    },
+    validations() {
+      return {
+          fullname: {
+           required:helpers.withMessage('ป้อนชื่อสกุลก่อน', required), 
+          },
+          username: {
+           required:helpers.withMessage('ป้อนชื่อผู้ใช้ก่อน', required), 
+           validUsername:helpers.withMessage('ชื่อผู้ใช้เป็นตัวอักษร a-z/A-Z เท่านั้น',validUsername)
+          },
+          mobile: {
+           required:helpers.withMessage('ป้อนเบอร์โทรศัพท์ก่อน', required), 
+          },
+          email: {
+           required:helpers.withMessage('ป้อนอีมเมล์ก่อน', required), 
+           email:helpers.withMessage('รูปแบบอีเมล์ไม่ถูกต้อง', email),  
+          },
+          password: {
+            password: {
+              required:helpers.withMessage('ป้อนรหัสผ่านก่อน', required), 
+              min:helpers.withMessage('รหัสผ่านความยาวขั้นต่ำ 6 ตัวอักษร', minLength(6)),
+            },
+            confirm_password: {
+              required:helpers.withMessage('ป้อนรหัสผ่านยืนยันก่อน', required), 
+              sameAs: helpers.withMessage('รหัสผ่านยืนยันไม่ตรงกัน',sameAs(this.password.password))
+            }
+            
+          },
+        }
+    },
+    methods: {
+      submitForm(){
+        this.v$.$validate() // เช็คตัว input ทุกช่อง
+        if(!this.v$.$error) {
+          // Validate ผ่านแล้ว
+          alert('ป้อนข้อมูลเรียบร้อยดีแล้ว')
+        }else{
+          // Validete ไม่ผ่าน
+          alert('ป้อนข้อมูลให้ครบก่อน')
+        }
+      }
+    }
+  }
 </script>
