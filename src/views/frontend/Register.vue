@@ -20,7 +20,9 @@
               <input v-model="fullname" :class="{'border-red-600': v$.fullname.$errors.length}"
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="fullname"
                 name="fullname" type="text">
-              <div v-if="v$.fullname.$error" class="text-sm mt-2 text-red-700"> {{ v$.fullname.$errors[0].$message }}
+
+              <div v-if="v$.fullname.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.fullname.$errors[0].$message }}
               </div>
 
               <label class="block mt-3 mb-2 text-sm" for="username">ชื่อผู้ใช้</label>
@@ -28,35 +30,43 @@
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="username"
                 name="username" type="text">
 
-              <div v-if="v$.username.$error" class="text-sm mt-2 text-red-700"> {{ v$.username.$errors[0].$message }}
+              <div v-if="v$.username.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.username.$errors[0].$message }}
               </div>
 
               <label class="block mt-3 mb-2 text-sm" for="mobile">เบอร์โทรศัพท์</label>
               <input v-model="mobile" :class="{'border-red-600': v$.mobile.$errors.length}"
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="mobile"
                 name="mobile" type="text">
-              <div v-if="v$.mobile.$error" class="text-sm mt-2 text-red-700"> {{ v$.mobile.$errors[0].$message }}</div>
+
+              <div v-if="v$.mobile.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.mobile.$errors[0].$message }}
+              </div>
 
               <label class="block mt-3 mb-2 text-sm" for="email">อีเมล์</label>
               <input v-model="email" :class="{'border-red-600': v$.email.$errors.length}"
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="email"
                 name="email" type="text">
-              <div v-if="v$.email.$error" class="text-sm mt-2 text-red-700"> {{ v$.email.$errors[0].$message }}</div>
+              <div v-if="v$.email.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.email.$errors[0].$message }}
+              </div>
 
               <label class="block mt-3 mb-2 text-sm" for="password">รหัสผ่าน</label>
               <input v-model="password.password" :class="{'border-red-600': v$.password.password.$errors.length}"
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none" id="password"
                 name="password" type="password">
-              <div v-if="v$.password.password.$error" class="text-sm mt-2 text-red-700"> {{
-              v$.password.password.$errors[0].$message }}</div>
+              <div v-if="v$.password.password.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.password.password.$errors[0].$message }}
+              </div>
 
               <label class="block mt-3 mb-2 text-sm" for="confirm_password">ยืนยันรหัสผ่าน</label>
               <input v-model="password.confirm_password"
                 :class="{'border-red-600': v$.password.confirm_password.$errors.length}"
                 class="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none"
                 id="confirm_password" name="confirm_password" type="password">
-              <div v-if="v$.password.confirm_password.$error" class="text-sm mt-2 text-red-700"> {{
-              v$.password.confirm_password.$errors[0].$message }}</div>
+              <div v-if="v$.password.confirm_password.$error" class="text-sm mt-2 text-red-700"> 
+                {{ v$.password.confirm_password.$errors[0].$message }}
+              </div>
 
               <p class="my-4"></p>
 
@@ -106,6 +116,9 @@
 //import Vuelidate
 import useVuelidate from '@vuelidate/core'
 import { required, email, minLength, sameAs, helpers } from '@vuelidate/validators'
+//import AuthService
+import http from '@/services/authService'
+
 
 export function validUsername(user) {
   let validUserPattern = new RegExp("^[a-zA-Z]*$");
@@ -164,10 +177,27 @@ export default {
       this.v$.$validate() // เช็คตัว input ทุกช่อง
       if (!this.v$.$error) {
         // Validate ผ่านแล้ว
-        alert('ป้อนข้อมูลเรียบร้อยดีแล้ว')
+        // alert('ป้อนข้อมูลเรียบร้อยดีแล้ว')
+
+         // ทำการยิง API Register
+         http.post('register', 
+            {
+              "fullname": this.fullname,
+              "username": this.username,
+              "email": this.email,
+              "password": this.password.password,
+              "password_confirmation": this.password.confirm_password,
+              "tel": this.mobile,
+              "role": 1
+            }
+            ).then(response => {
+            alert('Register Success')
+            // Redirect ไปหน้า Backend
+            this.$router.push({name: 'Backend'})
+          })
       } else {
         // Validete ไม่ผ่าน
-        alert('ป้อนข้อมูลให้ครบก่อน')
+        // alert('ป้อนข้อมูลให้ครบก่อน')
       }
     }
   }
